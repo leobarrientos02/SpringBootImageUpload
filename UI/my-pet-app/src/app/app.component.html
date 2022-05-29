@@ -8,16 +8,17 @@
       <div *ngIf="fileStatus.status==='progress'">
         <div class="progress">
           <div [style.width.%]="fileStatus.percent" class="progress-bar progress-bar-animated bg-info" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-              {{ fileStatus.requestType }} {{ fileStatus.percent }}
-            </div>
+            {{ fileStatus.requestType }} {{ fileStatus.percent }}
+          </div>
         </div>
-      </div> <hr>
+      </div>
+      <hr>
 
       <form enctype="multipart/form-data">
         <fieldset>
           <div class="form-group">
             <div>
-              <input type="file" name="files" multiple class="form-control" />
+              <input type="file" (change)="onUploadFiles($event)" name="files" multiple class="form-control" />
             </div>
           </div>
         </fieldset>
@@ -25,10 +26,11 @@
 
       <br>
 
-      <div class="js-upload-finished">
+      <div *ngIf="filenames.length > 0" class="js-upload-finished">
         <h3>Processed files</h3>
-        <div class="list-group">
-          <a class="list-group-item list-group-item-success" style="cursor: pointer;">
+        <div *ngFor="let filename of filenames" class="list-group">
+          <a (click)="onDownloadFile(filename)" class="list-group-item list-group-item-success" style="cursor: pointer;">
+            {{ filename }}
             <a class="alert-success float-right">Download</a>
           </a><br>
         </div>

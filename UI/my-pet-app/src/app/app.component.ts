@@ -15,9 +15,14 @@ export class AppComponent {
 
   constructor(private fileService: FileService){}
 
+  public test(event: any){
+    console.log(event);
+  }
+
   // Define a function to upload files
-  public onUploadFiles(files: File[]): void {
+  public onUploadFiles(event: any): void {
     const formData = new FormData();
+    let files = event?.target?.files;
     for(const file of files){
       formData.append('files', file, file.name);
     }
@@ -33,7 +38,7 @@ export class AppComponent {
   }
 
   // Define a function to download files
-  public onDownloadFiles(filename: string): void {
+  public onDownloadFile(filename: string): void {
     this.fileService.download(filename).subscribe(
       event => {
         console.log(event);
@@ -48,16 +53,17 @@ export class AppComponent {
   private reportProgress(httpEvent: HttpEvent<string[] | Blob>): void {
     switch(httpEvent.type){
       case HttpEventType.UploadProgress:
-        this.updateStatus(httpEvent.loaded, httpEvent.total!, 'Uploading');
+        this.updateStatus(httpEvent.loaded, httpEvent.total!, 'Uploading...');
         break;
       case HttpEventType.DownloadProgress:
-        this.updateStatus(httpEvent.loaded, httpEvent.total!, 'Downloading');
+        this.updateStatus(httpEvent.loaded, httpEvent.total!, 'Downloading...');
         break;
       case HttpEventType.ResponseHeader:
         console.log("Header returned", httpEvent);
         break;
       case HttpEventType.Response:
         if(httpEvent.body instanceof Array){
+          this.fileStatus.status = 'done';
           for(const filename of httpEvent.body){
             this.filenames.unshift(filename);
           }
@@ -66,6 +72,7 @@ export class AppComponent {
           saveAs(new File([httpEvent.body!], httpEvent.headers.get('File-Name')!,
             {type: `${httpEvent.headers.get('Content-Type')};charset=utf-8`}));
         }
+        this.fileStatus.status = 'done';
         break;
         default:
           console.log(httpEvent);
@@ -73,7 +80,7 @@ export class AppComponent {
     }
   }
 
-  private updateStatus(loaded: number, total: number, requestType: string) {
+  private updateStatus(loaded: number, total: number, requestType: string): void {
     this.fileStatus.status = 'progress';
     this.fileStatus.requestType = requestType;
     this.fileStatus.percent = Math.round(100 * loaded / total);
